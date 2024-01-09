@@ -1,3 +1,14 @@
+# saucerman的更新日志
+
+- 20240107 
+  - 去掉部分pip依赖的版本号
+  - 删除riddler(403)、virustotal(有验证码)、dnsgrep（有cloudcdn）、sublist3r(ssl错误)
+  - sitedossier 没结果的时候确实会报404
+  - jldc 没结果的时候会300
+  - dnsscan 部分500，还是勉强能用的
+
+
+<details>
 # OneForAll
 
 [![Build Status](https://travis-ci.org/shmilylty/OneForAll.svg?branch=master)](https://travis-ci.org/shmilylty/OneForAll)
@@ -312,3 +323,6 @@ FLAGS
 ## 💖Star趋势
 
 [![Stargazers over time](https://starchart.cc/shmilylty/OneForAll.svg)](https://starchart.cc/shmilylty/OneForAll)
+
+
+</details>

@@ -11,7 +11,7 @@ data_storage_dir = relative_directory.joinpath('data')  # 数据存放目录
 
 # OneForAll入口参数设置
 enable_check_network = True  # 开启网络环境检查
-enable_check_version = True  # 开启最新版本检查
+enable_check_version = False  # 开启最新版本检查
 enable_brute_module = True  # 使用爆破模块(默认True)
 enable_dns_resolve = True  # 使用DNS解析子域(默认True)
 enable_http_request = True  # 使用HTTP请求子域(默认True)
