@@ -18,8 +18,8 @@ class CensysAPI(Query):
         """
         向接口查询子域并做子域匹配
         """
-        self.header = self.get_header()
-        self.proxy = self.get_proxy(self.source)
+        self.header = self.get_header() # 获取header，这里主要是使用了随机ua
+        self.proxy = self.get_proxy(self.source) # 返回None
         params = {
             'q': f'names: {self.domain}',
             'per_page': 100,
@@ -49,10 +49,10 @@ class CensysAPI(Query):
         """
         类执行入口
         """
-        if not self.have_api(self.id, self.secret):
+        if not self.have_api(self.id, self.secret):  # 是否存在api
             return
-        self.begin()
-        self.query()
+        self.begin()  # 打印 线程开始了
+        self.query()  # 向接口查询子域并做子域匹配，结果保存在self.subdomains中
         self.finish()
         self.save_json()
         self.gen_result()

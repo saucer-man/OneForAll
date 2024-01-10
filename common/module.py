@@ -40,7 +40,7 @@ class Module(object):
         :param  apis: apis set
         :return bool: check result
         """
-        if not all(apis):
+        if not all(apis): # all 是一个内置函数，用于判断可迭代对象中的所有元素是否都为真（True）。如果可迭代对象中的所有元素都为真，all 函数返回 True；否则，返回 False。
             logger.log('DEBUG', f'{self.source} module is not configured')
             return False
         return True

@@ -146,16 +146,19 @@ class OneForAll(object):
         :return: subdomain results
         :rtype: list
         """
-        utils.init_table(self.domain)
+        # utils.init_table(self.domain)  # 在sqllite数据库中创建一个新的table，这里先不创建了
 
-        if not self.access_internet:
-            logger.log('ALERT', 'Because it cannot access the Internet, '
-                                'OneForAll will not execute the subdomain collection module!')
-        if self.access_internet:
-            self.enable_wildcard = wildcard.detect_wildcard(self.domain)
+        # 下面能不能上网 感觉不需要检查，先给注释了吧
+        # if not self.access_internet:
+        #     logger.log('ALERT', 'Because it cannot access the Internet, '
+        #                         'OneForAll will not execute the subdomain collection module!')
+        # if self.access_internet:
+        # 下面检查是否存在泛解析，如果存在泛解析就不需要爆破了
+        self.enable_wildcard = wildcard.detect_wildcard(self.domain)
 
-            collect = Collect(self.domain)
-            collect.run()
+        # 下面运行信息收集模块
+        collect = Collect(self.domain)
+        collect.run()
 
         srv = BruteSRV(self.domain)
         srv.run()
@@ -229,26 +232,26 @@ class OneForAll(object):
         :return: All subdomain results
         :rtype: list
         """
-        print(oneforall_banner)
+        print(oneforall_banner) # 输出banner
         dt = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         print(f'[*] Starting OneForAll @ {dt}\n')
         logger.log('DEBUG', 'Python ' + utils.python_version())
         logger.log('DEBUG', 'OneForAll ' + version)
-        utils.check_dep()
-        self.access_internet = utils.get_net_env()
-        if self.access_internet and settings.enable_check_version:
-            utils.check_version(version)
+        utils.check_dep() # 检查依赖，python版本等
+        # self.access_internet = utils.get_net_env()  # 检查能不能上网，这里通过访问baidu什么的来决定
+        # if self.access_internet and settings.enable_check_version:
+        #     utils.check_version(version)  # 检查版本是否有更新
         logger.log('INFOR', 'Start running OneForAll')
-        self.config_param()
-        self.check_param()
-        self.domains = utils.get_domains(self.target, self.targets)
+        self.config_param()  # 配置参数，优先命令行，然后配置文件 api.py 和 setting.py
+        self.check_param()  # 检查参数，这里只检查了target是否为空
+        self.domains = utils.get_domains(self.target, self.targets)   # 读取单个target 或者targets文件 到self.domains，这里会验证domain的有效性
         count = len(self.domains)
         logger.log('INFOR', f'Got {count} domains')
         if not count:
             logger.log('FATAL', 'Failed to obtain domain')
             exit(1)
         for domain in self.domains:
-            self.domain = utils.get_main_domain(domain)
+            self.domain = utils.get_main_domain(domain)  # 得到域名的顶级域名，www.baidu.com  --> baidu.com
             self.main()
         if count > 1:
             utils.export_all(self.alive, self.fmt, self.path, self.datas)

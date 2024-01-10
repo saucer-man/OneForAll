@@ -42,9 +42,11 @@ class Collect(object):
         Class entrance
         """
         logger.log('INFOR', f'Start collecting subdomains of {self.domain}')
+        # 下面两行 import 各个模块进来
         self.get_mod()
         self.import_func()
 
+        # 下面将domain传递给各个模块，然后多线程运行
         threads = []
         # Create subdomain collection threads
         for func_obj, func_name in self.collect_funcs:
