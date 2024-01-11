@@ -141,33 +141,59 @@ def run_resolve(domain, data):
     :rtype: list
     """
     logger.log('INFOR', f'Start resolving subdomains of {domain}')
-    subdomains = filter_subdomain(data)
+    subdomains = filter_subdomain(data) # 从data中得到subdomain，过滤出无解析内容的子域到新的子域列表
     if not subdomains:
         return data
 
-    massdns_dir = settings.third_party_dir.joinpath('massdns')
-    result_dir = settings.result_save_dir
-    temp_dir = result_dir.joinpath('temp')
-    utils.check_dir(temp_dir)
-    massdns_path = utils.get_massdns_path(massdns_dir)
-    timestring = utils.get_timestring()
+    massdns_dir = settings.third_party_dir.joinpath('massdns')  # WindowsPath('C:/Users/yanq/Documents/OneForAll/thirdparty/massdns')
+    result_dir = settings.result_save_dir  # WindowsPath('C:/Users/yanq/Documents/OneForAll/results')
+    temp_dir = result_dir.joinpath('temp')  # WindowsPath('C:/Users/yanq/Documents/OneForAll/results/temp')
+    utils.check_dir(temp_dir)  # 检查temp_dir目录是否存在，如果不存在，则需要创建一个
+    massdns_path = utils.get_massdns_path(massdns_dir)  # WindowsPath('C:/Users/yanq/Documents/OneForAll/thirdparty/massdns/windows/x64/massdns.exe')
+    timestring = utils.get_timestring()  ## '20240111_171843'
 
     save_name = f'collected_subdomains_{domain}_{timestring}.txt'
-    save_path = temp_dir.joinpath(save_name)
-    save_subdomains(save_path, subdomains)
+    save_path = temp_dir.joinpath(save_name)  # WindowsPath('C:/Users/yanq/Documents/OneForAll/results/temp/collected_subdomains_saucer-man.com_20240111_171843.txt')
+    save_subdomains(save_path, subdomains)  # 将子域名列表保存在临时文件中
     del subdomains
     gc.collect()
 
     output_name = f'resolved_result_{domain}_{timestring}.json'
-    output_path = temp_dir.joinpath(output_name)
+    output_path = temp_dir.joinpath(output_name)  # WindowsPath('C:/Users/yanq/Documents/OneForAll/results/temp/resolved_result_saucer-man.com_20240111_171843.json')
     log_path = result_dir.joinpath('massdns.log')
-    ns_path = utils.get_ns_path()
+    ns_path = utils.get_ns_path()   # WindowsPath('C:/Users/yanq/Documents/OneForAll/data/nameservers.txt')
 
     logger.log('INFOR', f'Running massdns to resolve subdomains')
+
+    # 下面执行cmd：
+    #  # C:\Users\yanq\Documents\OneForAll\thirdparty\massdns\windows\x64\massdns.exe --quiet --status-format ansi --processes 1 --socket-count 1 --hashmap-size 10000 --resolvers C:\Users\yanq\Documents\OneForAll\data\nameservers.txt --resolve-count 15 --type A --flush --output J --outfile C:\Users\yanq\Documents\OneForAll\results\temp\resolved_result_saucer-man.com_20240111_171843.json --root --error-log C:\Users\yanq\Documents\OneForAll\results\massdns.log C:\Users\yanq\Documents\OneForAll\results\temp\collected_subdomains_saucer-man.com_20240111_171843.txt --filter OK --sndbuf 0 --rcvbuf 0
     utils.call_massdns(massdns_path, save_path, ns_path,
                        output_path, log_path, quiet_mode=True)
 
+    # 执行完上面的cmd之后，output_name json文件中保存的内容如下：
+    # {"name": "www.saucer-man.com.", "type": "A", "class": "IN", "status": "NOERROR", "data": {
+    #     "answers": [{"ttl": 600, "type": "A", "class": "IN", "name": "www.saucer-man.com.", "data": "106.52.169.251"}]},
+    #  "resolver": "4.2.2.4:53"}
+    # {"name": "ai2.saucer-man.com.", "type": "A", "class": "IN", "status": "NOERROR", "data": {
+    #     "answers": [{"ttl": 600, "type": "A", "class": "IN", "name": "ai2.saucer-man.com.", "data": "42.192.189.2"}]},
+    #  "resolver": "64.6.65.6:53"}
+    # {"name": "ai3.saucer-man.com.", "type": "A", "class": "IN", "status": "NOERROR", "data": {
+    #     "answers": [{"ttl": 600, "type": "A", "class": "IN", "name": "ai3.saucer-man.com.", "data": "42.192.189.2"}]},
+    #  "resolver": "1.0.0.19:53"}
+    # {"name": "ai.saucer-man.com.", "type": "A", "class": "IN", "status": "NOERROR", "data": {
+    #     "answers": [{"ttl": 600, "type": "A", "class": "IN", "name": "ai.saucer-man.com.", "data": "8.219.203.196"}]},
+    #  "resolver": "4.2.2.6:53"}
+    # {"name": "saucer-man.com.", "type": "A", "class": "IN", "status": "NOERROR", "data": {"answers": [
+    #     {"ttl": 600, "type": "CNAME", "class": "IN", "name": "saucer-man.com.",
+    #      "data": "saucer-man.com.w.kunlungr.com."},
+    #     {"ttl": 60, "type": "A", "class": "IN", "name": "saucer-man.com.w.kunlungr.com.", "data": "58.218.215.165"}]},
+    #  "resolver": "4.2.2.4:53"}
+
+    # 将masscan解析的结果读取到infos中：
+    # {'www.saucer-man.com': {'resolver': '4.2.2.4:53', 'resolve': 1, 'reason': 'OK', 'cname': 'www.saucer-man.com', 'ip': '106.52.169.251', 'ttl': '600'}, 'ai2.saucer-man.com': {'resolver': '64.6.65.6:53', 'resolve': 1, 'reason': 'OK', 'cname': 'ai2.saucer-man.com', 'ip': '42.192.189.2', 'ttl': '600'}, 'ai3.saucer-man.com': {'resolver': '1.0.0.19:53', 'resolve': 1, 'reason': 'OK', 'cname': 'ai3.saucer-man.com', 'ip': '42.192.189.2', 'ttl': '600'}, 'ai.saucer-man.com': {'resolver': '4.2.2.6:53', 'resolve': 1, 'reason': 'OK', 'cname': 'ai.saucer-man.com', 'ip': '8.219.203.196', 'ttl': '600'}, 'saucer-man.com': {'resolver': '4.2.2.4:53', 'resolve': 1, 'reason': 'OK', 'cname': 'saucer-man.com.w.kunlungr.com', 'ip': '58.218.215.165', 'ttl': '60'}}
     infos = deal_output(output_path)
+
+    # 将info的结果回填到data中
     data = update_data(data, infos)
     logger.log('INFOR', f'Finished resolve subdomains of {domain}')
     return data

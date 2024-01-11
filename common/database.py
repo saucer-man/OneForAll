@@ -38,6 +38,11 @@ class Database(object):
             results = self.conn.query(sql)
         except Exception as e:
             logger.log('ERROR', e.args)
+
+            logger.log('ERROR', sql)
+            # import traceback
+            # traceback.print_exc()
+
             return None
         return results
 
@@ -193,7 +198,7 @@ class Database(object):
     def deduplicate_subdomain(self, table_name):
         """
         Deduplicate subdomains in the table
-
+        删除表中的子域的重复数据
         :param str table_name: table name
         """
         table_name = table_name.replace('.', '_')

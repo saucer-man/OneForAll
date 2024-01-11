@@ -12,7 +12,7 @@ data_storage_dir = relative_directory.joinpath('data')  # 数据存放目录
 # OneForAll入口参数设置
 enable_check_network = True  # 开启网络环境检查
 enable_check_version = False  # 开启最新版本检查
-enable_brute_module = True  # 使用爆破模块(默认True)
+enable_brute_module = False  # 使用爆破模块(默认True)
 enable_dns_resolve = True  # 使用DNS解析子域(默认True)
 enable_http_request = True  # 使用HTTP请求子域(默认True)
 enable_finder_module = True  # 开启finder模块,开启会从响应体和JS中再次发现子域(默认True)
@@ -30,8 +30,8 @@ result_save_path = None  # 子域结果保存文件路径(默认None)
 
 # 收集模块设置
 save_module_result = False  # 保存各模块发现结果为json文件(默认False)
-enable_all_module = True  # 启用所有收集模块(默认True)
-enable_partial_module = []  # 启用部分收集模块 必须禁用enable_all_module才能生效
+enable_all_module = False  # 启用所有收集模块(默认True)
+enable_partial_module = ['modules.certificates.censys_api']  # 启用部分收集模块 必须禁用enable_all_module才能生效
 # 只使用ask和baidu搜索引擎收集子域的示例
 # enable_partial_module = ['modules.search.ask', 'modules.search.baidu']
 

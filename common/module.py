@@ -307,12 +307,12 @@ class Module(object):
         else:
             for subdomain in self.subdomains:
                 url = 'http://' + subdomain
-                level = subdomain.count('.') - self.domain.count('.')
-                info = self.infos.get(subdomain)
+                level = subdomain.count('.') - self.domain.count('.') # 一级子域名还是二级子域名，一般都是一级
+                info = self.infos.get(subdomain)  # 这里默认为空
                 if info is None:
                     info = dict()
                 cname = info.get('cname')
-                ip = info.get('ip')
+                ip = info.get('ip') # info为none，所以这里全是空的
                 ip_times = info.get('ip_times')
                 cname_times = info.get('cname_times')
                 ttl = info.get('ttl')
@@ -354,12 +354,17 @@ class Module(object):
                           'source': self.source,
                           'elapse': self.elapse,
                           'find': len(self.subdomains)}
+
+
+                # {'id': None, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://ai3.saucer-man.com', 'subdomain': 'ai3.saucer-man.com', 'port': 80, 'level': 1, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 1.1, 'find': 6}
                 self.results.append(result)
 
     def save_db(self):
         """
         Save module results into the database
+        这里后续就不保存数据库了，感觉没啥用
         """
+
         logger.log('DEBUG', f'Saving results to database')
         lock.acquire()
         db = Database()

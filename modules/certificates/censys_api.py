@@ -53,9 +53,9 @@ class CensysAPI(Query):
             return
         self.begin()  # 打印 线程开始了
         self.query()  # 向接口查询子域并做子域匹配，结果保存在self.subdomains中
-        self.finish()
-        self.save_json()
-        self.gen_result()
+        self.finish() #  打印出，线程结束了，总共获取到多少子域名
+        self.save_json()  # 保存在json中，因为save_module_result默认为false
+        self.gen_result()   # 子域名，结果保存在self.results中
         self.save_db()
 
 

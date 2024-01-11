@@ -602,6 +602,8 @@ def call_massdns(massdns_path, dict_path, ns_path, output_path, log_path,
           f'--flush --output J --outfile {output_path} ' \
           f'--root --error-log {log_path} {dict_path} --filter OK ' \
           f'--sndbuf 0 --rcvbuf 0'
+
+    # C:\Users\yanq\Documents\OneForAll\thirdparty\massdns\windows\x64\massdns.exe --quiet --status-format ansi --processes 1 --socket-count 1 --hashmap-size 10000 --resolvers C:\Users\yanq\Documents\OneForAll\data\nameservers.txt --resolve-count 15 --type A --flush --output J --outfile C:\Users\yanq\Documents\OneForAll\results\temp\resolved_result_saucer-man.com_20240111_171843.json --root --error-log C:\Users\yanq\Documents\OneForAll\results\massdns.log C:\Users\yanq\Documents\OneForAll\results\temp\collected_subdomains_saucer-man.com_20240111_171843.txt --filter OK --sndbuf 0 --rcvbuf 0
     logger.log('DEBUG', f'Run command {cmd}')
     subprocess.run(args=cmd, shell=True)
     logger.log('DEBUG', f'Finished massdns')
@@ -749,8 +751,8 @@ def looks_like_ip(maybe_ip):
 
 def deal_data(domain):
     db = Database()
-    db.remove_invalid(domain)
-    db.deduplicate_subdomain(domain)
+    db.remove_invalid(domain)  # 删除表中的子域的空数据
+    db.deduplicate_subdomain(domain) # 删除表中的子域的重复数据
     db.close()
 
 

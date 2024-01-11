@@ -146,7 +146,7 @@ class OneForAll(object):
         :return: subdomain results
         :rtype: list
         """
-        # utils.init_table(self.domain)  # 在sqllite数据库中创建一个新的table，这里先不创建了
+        utils.init_table(self.domain)  # 在sqllite数据库中创建一个新的table，这里后续就不创建了
 
         # 下面能不能上网 感觉不需要检查，先给注释了吧
         # if not self.access_internet:
@@ -156,13 +156,18 @@ class OneForAll(object):
         # 下面检查是否存在泛解析，如果存在泛解析就不需要爆破了
         self.enable_wildcard = wildcard.detect_wildcard(self.domain)
 
-        # 下面运行信息收集模块
+        # 下面运行信息收集模块，也就是配置文件中写的模块
         collect = Collect(self.domain)
         collect.run()
+        # 收集完了之后保存的是数据库和json好像没有csv
 
+
+        # 下面通过枚举常见的SRV记录并做查询来收集子域srv
         srv = BruteSRV(self.domain)
         srv.run()
 
+
+        # 下面是子域名爆破，这里先暂停了
         if self.brute:
             # Due to there will be a large number of dns resolution requests,
             # may cause other network tasks to be error
@@ -171,20 +176,30 @@ class OneForAll(object):
             brute.quite = True
             brute.run()
 
-        utils.deal_data(self.domain)
+        utils.deal_data(self.domain) # 删除sqllite数据库中的子域的空数据和重复数据
         # Export results without resolve
-        if not self.dns:
+        if not self.dns: # 使用DNS解析子域，默认为true，所以不会走这里
             self.data = self.export_data()
             self.datas.extend(self.data)
             return self.data
 
-        self.data = utils.get_data(self.domain)
+        self.data = utils.get_data(self.domain)  # 从数据库中得到data
+
+        # print("self.data")
+        # print(self.data) # [{'id': 1, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://notes.saucer-man.com', 'subdomain': 'notes.saucer-man.com', 'port': 80, 'level': 1, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 0.9, 'find': 6}, {'id': 2, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://ai.saucer-man.com', 'subdomain': 'ai.saucer-man.com', 'port': 80, 'level': 1, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 0.9, 'find': 6}, {'id': 3, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://www.saucer-man.com', 'subdomain': 'www.saucer-man.com', 'port': 80, 'level': 1, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 0.9, 'find': 6}, {'id': 4, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://saucer-man.com', 'subdomain': 'saucer-man.com', 'port': 80, 'level': 0, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 0.9, 'find': 6}, {'id': 5, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://ai2.saucer-man.com', 'subdomain': 'ai2.saucer-man.com', 'port': 80, 'level': 1, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 0.9, 'find': 6}, {'id': 6, 'alive': None, 'request': None, 'resolve': None, 'url': 'http://ai3.saucer-man.com', 'subdomain': 'ai3.saucer-man.com', 'port': 80, 'level': 1, 'cname': None, 'ip': None, 'public': None, 'cdn': None, 'status': None, 'reason': None, 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': None, 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': None, 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 0.9, 'find': 6}]
+
 
         # Resolve subdomains
-        utils.clear_data(self.domain)
+        utils.clear_data(self.domain) # 删除表，这里不知道是为啥
+
         self.data = resolve.run_resolve(self.domain, self.data)
+
+        print("解析玩之后的data")
+        print(self.data)
+
+
         # Save resolve results
-        resolve.save_db(self.domain, self.data)
+        resolve.save_db(self.domain, self.data) # 保存在数据库中
 
         # Export results without HTTP request
         if not self.req:
@@ -237,7 +252,7 @@ class OneForAll(object):
         print(f'[*] Starting OneForAll @ {dt}\n')
         logger.log('DEBUG', 'Python ' + utils.python_version())
         logger.log('DEBUG', 'OneForAll ' + version)
-        utils.check_dep() # 检查依赖，python版本等
+        utils.check_dep()  # 检查依赖，python版本等
         # self.access_internet = utils.get_net_env()  # 检查能不能上网，这里通过访问baidu什么的来决定
         # if self.access_internet and settings.enable_check_version:
         #     utils.check_version(version)  # 检查版本是否有更新
