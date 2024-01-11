@@ -22,7 +22,7 @@ class Finder(Module):
     def run(self, domain, data, port):
         logger.log('INFOR', f'Start Finder module')
         existing_subdomains = set(map(lambda x: x.get('subdomain'), data))  # 已有的子域
-        found_subdomains = find_subdomains(domain, data)
+        found_subdomains = find_subdomains(domain, data) #
         new_subdomains = found_subdomains - existing_subdomains
         if not len(new_subdomains):
             self.finish()  # 未发现新的子域就直接返回

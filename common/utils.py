@@ -355,13 +355,13 @@ def export_all(alive, fmt, path, datas):
     """
     将所有结果数据导出
 
-    :param bool alive: 只导出存活子域结果
-    :param str fmt: 导出文件格式
-    :param str path: 导出文件路径
+    :param bool alive: 只导出存活子域结果  默认False
+    :param str fmt: 导出文件格式  csv
+    :param str path: 导出文件路径 子域结果保存文件路径(默认None)
     :param list datas: 待导出的结果数据
     """
-    fmt = check_format(fmt)
-    timestamp = get_timestring()
+    fmt = check_format(fmt) # 检查是否为json或者csv，这里fmt默认为csv
+    timestamp = get_timestring() # 事件
     name = f'all_subdomain_result_{timestamp}'
     export_all_results(path, name, fmt, datas)
     export_all_subdomains(alive, path, name, datas)

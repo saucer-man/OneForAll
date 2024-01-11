@@ -190,54 +190,69 @@ class OneForAll(object):
 
 
         # Resolve subdomains
-        utils.clear_data(self.domain) # 删除表，这里不知道是为啥
+        utils.clear_data(self.domain)  # 删除表，这里不知道是为啥
 
+        # 下面解析子域名的dns记录，A记录和ip地址等等
         self.data = resolve.run_resolve(self.domain, self.data)
 
         print("解析玩之后的data")
-        print(self.data)
+        print(self.data) # [{'id': 1, 'alive': None, 'request': None, 'resolve': 1, 'url': 'http://ai2.saucer-man.com', 'subdomain': 'ai2.saucer-man.com', 'port': 80, 'level': 1, 'cname': 'ai2.saucer-man.com', 'ip': '42.192.189.2', 'public': None, 'cdn': None, 'status': None, 'reason': 'OK', 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': '600', 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': '4.2.2.6:53', 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 1.1, 'find': 6}, {'id': 2, 'alive': None, 'request': None, 'resolve': 1, 'url': 'http://saucer-man.com', 'subdomain': 'saucer-man.com', 'port': 80, 'level': 0, 'cname': 'saucer-man.com.w.kunlungr.com', 'ip': '58.218.215.165', 'public': None, 'cdn': None, 'status': None, 'reason': 'OK', 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': '60', 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': '4.2.2.2:53', 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 1.1, 'find': 6}, {'id': 3, 'alive': None, 'request': None, 'resolve': 1, 'url': 'http://ai.saucer-man.com', 'subdomain': 'ai.saucer-man.com', 'port': 80, 'level': 1, 'cname': 'ai.saucer-man.com', 'ip': '8.219.203.196', 'public': None, 'cdn': None, 'status': None, 'reason': 'OK', 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': '600', 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': '1.1.1.1:53', 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 1.1, 'find': 6}, {'id': 4, 'alive': None, 'request': None, 'resolve': 1, 'url': 'http://www.saucer-man.com', 'subdomain': 'www.saucer-man.com', 'port': 80, 'level': 1, 'cname': 'www.saucer-man.com', 'ip': '106.52.169.251', 'public': None, 'cdn': None, 'status': None, 'reason': 'OK', 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': '600', 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': '1.0.0.2:53', 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 1.1, 'find': 6}, {'id': 5, 'alive': None, 'request': None, 'resolve': 1, 'url': 'http://ai3.saucer-man.com', 'subdomain': 'ai3.saucer-man.com', 'port': 80, 'level': 1, 'cname': 'ai3.saucer-man.com', 'ip': '42.192.189.2', 'public': None, 'cdn': None, 'status': None, 'reason': 'OK', 'title': None, 'banner': None, 'header': None, 'history': None, 'response': None, 'ip_times': None, 'cname_times': None, 'ttl': '600', 'cidr': None, 'asn': None, 'org': None, 'addr': None, 'isp': None, 'resolver': '1.0.0.2:53', 'module': 'Certificate', 'source': 'CensysAPIQuery', 'elapse': 1.1, 'find': 6}]
+
 
 
         # Save resolve results
-        resolve.save_db(self.domain, self.data) # 保存在数据库中
+        resolve.save_db(self.domain, self.data)  # 保存在数据库中
 
         # Export results without HTTP request
+        # req 就是表示是否对子域名进行http请求，默认为true,一般不会走下面的判断
         if not self.req:
             self.data = self.export_data()
             self.datas.extend(self.data)
             return self.data
 
-        if self.enable_wildcard:
+        if self.enable_wildcard:  # 如果存在泛解析，去掉泛解析的data，这里一般不会走到
             # deal wildcard
             self.data = wildcard.deal_wildcard(self.data)
 
         # HTTP request
-        utils.clear_data(self.domain)
+        utils.clear_data(self.domain)  # 又删除数据库
+
+        # 对子域名进行http请求，将结果保存在sql中
         request.run_request(self.domain, self.data, self.port)
 
         # Finder module
+        # 开启finder模块,开启会从响应体和JS中再次发现子域(默认True)
+        # 从数据库中取出resp，做正则匹配
         if settings.enable_finder_module:
             finder = Finder()
             finder.run(self.domain, self.data, self.port)
 
         # altdns module
+        # 开启altdns模块,开启会利用置换技术重组子域再次发现新子域(默认True)
         if settings.enable_altdns_module:
             altdns = Altdns(self.domain)
             altdns.run(self.data, self.port)
 
         # Information enrichment module
+        # # 开启enrich模块，开启会富化出信息，如ip的cdn，cidr，asn，org，addr和isp等信息
         if settings.enable_enrich_module:
             enrich = Enrich(self.domain)
             enrich.run()
 
+        # 从数据库中取出数据，并且保存在csv文件中
         self.data = self.export_data()
+
+        # self.datas一般为空
         self.datas.extend(self.data)
 
         # Scan subdomain takeover
+        # 扫描子域名接管，默认为False
         if self.takeover:
             subdomains = utils.get_subdomains(self.data)
             takeover = Takeover(targets=subdomains)
             takeover.run()
+
+        utils.clear_data(self.domain)  # 最后的最后，删除表，csv已经在上面保存过了
         return self.data
 
     def run(self):
@@ -267,9 +282,9 @@ class OneForAll(object):
             exit(1)
         for domain in self.domains:
             self.domain = utils.get_main_domain(domain)  # 得到域名的顶级域名，www.baidu.com  --> baidu.com
-            self.main()
+            self.main()  # 执行子域名查找的逻辑，结果保存在sql中
         if count > 1:
-            utils.export_all(self.alive, self.fmt, self.path, self.datas)
+            utils.export_all(self.alive, self.fmt, self.path, self.datas)  # 导出datas的结果到csv中
         logger.log('INFOR', 'Finished OneForAll')
 
     @staticmethod
