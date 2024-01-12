@@ -766,6 +766,7 @@ def get_data(domain):
 def clear_data(domain):
     db = Database()
     db.drop_table(domain)
+    db.query("VACUUM")
     db.close()
 
 
