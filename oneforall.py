@@ -176,7 +176,7 @@ class OneForAll(object):
             brute.quite = True
             brute.run()
 
-        utils.deal_data(self.domain) # 删除sqllite数据库中的子域的空数据和重复数据
+        utils.deal_data(self.domain)  # 删除sqllite数据库中的子域的空数据和重复数据
         # Export results without resolve
         if not self.dns: # 使用DNS解析子域，默认为true，所以不会走这里
             self.data = self.export_data()
@@ -283,8 +283,16 @@ class OneForAll(object):
         for domain in self.domains:
             self.domain = utils.get_main_domain(domain)  # 得到域名的顶级域名，www.baidu.com  --> baidu.com
             self.main()  # 执行子域名查找的逻辑，结果保存在sql中
-        if count > 1:
-            utils.export_all(self.alive, self.fmt, self.path, self.datas)  # 导出datas的结果到csv中
+
+            # 下面清除内存，是我自己加的，因为我不需要用到下面的
+            self.domain = str()  # The domain currently being collected
+            self.domains = set()  # All domains that are to be collected
+            self.data = list()  # The subdomain results of the current domain
+            self.datas = list()  # All subdomain results of the domain
+
+        # 如果一次查询了多个域名，则将所有的结果保存在一个文件中，但是这样内存占用会扩大，所以我直接在self.main()中将保存结果的w变成了a
+        # if count > 1:
+        #     utils.export_all(self.alive, self.fmt, self.path, self.datas)  # 导出datas的结果到csv中
         logger.log('INFOR', 'Finished OneForAll')
 
     @staticmethod

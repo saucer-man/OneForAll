@@ -198,8 +198,8 @@ def check_path(path, name, fmt):
     if not parent_dir.exists():
         logger.log('ALERT', f'{parent_dir} does not exist, directory will be created')
         parent_dir.mkdir(parents=True, exist_ok=True)
-    if path.exists():
-        logger.log('ALERT', f'The {path} exists and will be overwritten')
+
+
     return path
 
 
@@ -248,7 +248,7 @@ def save_to_file(path, data):
     :return: 保存成功与否
     """
     try:
-        with open(path, 'w', errors='ignore', newline='') as file:
+        with open(path, 'a', errors='ignore', newline='') as file:
             file.write(data)
             return True
     except TypeError:
