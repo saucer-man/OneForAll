@@ -60,7 +60,9 @@ def do_export(fmt, path, rows, show, domain, target):
     if show: # false
         print(rows.dataset)
     data = rows.export(fmt)  # rows是RecordCollection 对象，也就是数据库对象
-
+    if not data:  # data 有时候会为空的
+        data = rows.as_dict()
+        return data, fmt, path
 
     # 到这里之后data为
     # id,alive,request,resolve,url,subdomain,level,cname,ip,public,cdn,port,status,reason,title,banner,cidr,asn,org,addr,isp,source
